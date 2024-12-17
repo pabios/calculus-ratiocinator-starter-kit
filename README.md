@@ -1,6 +1,12 @@
 # Calculus Ratiocinator
 
-Initiation à la Programmation Fonctionnelle.
+Initiation à la __Programmation Fonctionnelle__ avec __TypeScript__ et l'environnement d'exécution __Bun__ (<https://bun.sh>).
+
+## Installation des dépendances
+
+```sh
+bun install
+```
 
 ## Exécution
 
@@ -8,13 +14,13 @@ Initiation à la Programmation Fonctionnelle.
 bun start
 ```
 
-## Exécution en hot reloading
+## Exécution avec hot reloading
 
 ```sh
 bun dev
 ```
 
-## Exécution des tests
+## Exécution des tests unitaires
 
 ```sh
 bun test
