@@ -1,3 +1,5 @@
+> ©️ BALDE Ismaila
+
 # Calculus Ratiocinator
 
 Initiation à la __Programmation Fonctionnelle__ avec __TypeScript__ et l'environnement d'exécution __Bun__ (<https://bun.sh>).
@@ -64,6 +66,7 @@ bun test
 ```
 
 --
+</details> ```
 
 !["Logotype Shrp"](https://sherpa.one/images/sherpa-logotype.png)
 
@@ -75,4 +78,3 @@ Nancy (Grand Est, France)
 
 <https://shrp.dev>
 
-</details> ```
