@@ -12,7 +12,7 @@ Initiation à la __Programmation Fonctionnelle__ avec __TypeScript__ et l'enviro
 ### Instructions
 1. **Construire et lancer le conteneur :**
 ```bash
-   docker-compose up --build
+   docker compose up --build
 ```
 2. **Entrer dans le conteneur :**
 ```bash

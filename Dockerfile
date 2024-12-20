@@ -5,8 +5,8 @@ WORKDIR /app
 COPY package.json bun.lockb ./
 RUN bun install
 
-COPY . .
+#COPY . .
 
-EXPOSE 3000
+#EXPOSE 3000
 
-CMD ["bun", "dev"]
+#CMD ["bun", "dev"]
