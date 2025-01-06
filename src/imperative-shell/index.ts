@@ -1,7 +1,7 @@
 /**
  * Logique Recursive ET affichage du resultat
  * - Objectif: gestion des tour de seance de tir et restitution du resultat
- * 2 fonctions principal avec ou sans utilisation des Either :
+ * 2 fonctions principal:
  * - playPenaltyShootoutRecursive
  * - displayHistory
  *
@@ -56,7 +56,6 @@ export const playPenaltyShootoutRecursive = (
         return Either.left("Match nul apres des prolongations interminables !");
     }
 
-    // Continuation de la séance
     return playPenaltyShootoutRecursive(updatedScoreB, updatedHistory, seance + 1);
 };
 const displayHistory = (result: Either<string, PenaltyHistory>): void => {
