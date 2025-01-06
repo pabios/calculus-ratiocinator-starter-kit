@@ -1,12 +1,171 @@
-import { increment } from "../functional-core/functions";
+/**
+ * Logique Recursive ET affichage du resultat
+ * - Objectif: gestion des tour de seance de tir et restitution du resultat
+ * 2 fonctions principal avec ou sans utilisation des Either :
+ * - playPenaltyShootoutRecursive
+ * - displayHistory
+ *
+ */
 
-const counterObj = Object.freeze({ kikoo: { value: 1 } });
-counterObj.kikoo.value = 2;
+import {
+    Score,
+    PenaltyHistory,
+    simulatePenalty,
+    updateScore,
+    addToHistory, PenaltyResult,
+} from "../functional-core/functions";
+import {Either} from "../functional-core/either/Either.ts";
 
-const counter: number = 1;
-const counter2: number = increment(counter);
+const MAX_SEANCE_DE_TIRE_SENARIOT_D_EXCEPTION = 100; // Au bout de 100 prolongation alos match null stp
 
-console.assert(counter === 1);
-console.assert(increment(counter) === 2);
+/****************************************************************************************************************************************
+ *  Les 2 fonction sans  l'utilisation des Either
+ *  playPenaltyShootoutRecursive et l'affichage du resultat sans utilisation des Either
+ * ******************************************************************************************************************************/
+export const playPenaltyShootoutRecursiveSansEither = (
+    score: Score,
+    history: PenaltyHistory = [],
+    seance: number = 1
+): PenaltyHistory => {
+    const resultA: PenaltyResult = { team: "TeamA", scored: simulatePenalty() };
+    const updatedScoreA = updateScore(score, resultA);
 
-console.log(counter2);
+    const resultB: PenaltyResult = { team: "TeamB", scored: simulatePenalty() };
+    const updatedScoreB = updateScore(updatedScoreA, resultB);
+
+    const updatedHistory = addToHistory(
+        addToHistory(history, seance, updatedScoreA, resultA),
+        seance,
+        updatedScoreB,
+        resultB
+    );
+
+    if (seance >= 5) {
+        if (updatedScoreB.TeamA !== updatedScoreB.TeamB) {
+            return updatedHistory; // Fin normale si un gagnant est trouvé
+        }
+        console.log("Égalité après 5 tours, passage au Scénario alternatif 2 !");
+    }
+
+    if (seance > 5 && Math.abs(updatedScoreB.TeamA - updatedScoreB.TeamB) === 1) {
+        return updatedHistory; // Le premier qui surpasse l'autre
+    }
+
+    if (seance >= MAX_SEANCE_DE_TIRE_SENARIOT_D_EXCEPTION) {
+        console.log("Match nul apres des prolongations interminables !");
+        return updatedHistory; // Terminer avec un match nul
+    }
+
+    return playPenaltyShootoutRecursiveSansEither(updatedScoreB, updatedHistory, seance + 1);
+};
+
+const displayHistorySansEither = (history: PenaltyHistory): void => {
+    history.forEach(({ seance, score, result }) => {
+        console.log(
+            `Seance de Tir ${seance}: Score: ${score.TeamA}/${score.TeamB} (Equipe ${
+                result.team
+            }: ${result.scored ? "✅" : "❌"})`
+        );
+    });
+
+    const finalScore = history[history.length - 1].score;
+    console.log(
+        `Victoire : ${
+            finalScore.TeamA > finalScore.TeamB ? "TeamA" : "TeamB"
+        } (Score final: ${finalScore.TeamA}/${finalScore.TeamB})`
+    );
+};
+
+/****************************************************************************************************************************************
+ * Les 2 fonction avec l'utilisation des Either
+ * - playPenaltyShootoutRecursive et
+ * - l'affichage du resultat
+ * ******************************************************************************************************************************/
+export const playPenaltyShootoutRecursive = (
+    score: Score,
+    history: PenaltyHistory = [],
+    seance: number = 1
+): Either<string, PenaltyHistory> => {
+    const resultA: PenaltyResult = { team: "TeamA", scored: simulatePenalty() };
+    const updatedScoreA = updateScore(score, resultA);
+
+    const resultB: PenaltyResult = { team: "TeamB", scored: simulatePenalty() };
+    const updatedScoreB = updateScore(updatedScoreA, resultB);
+
+    const updatedHistory = addToHistory(
+        addToHistory(history, seance, updatedScoreA, resultA),
+        seance,
+        updatedScoreB,
+        resultB
+    );
+
+    if (seance >= 5 && updatedScoreB.TeamA === updatedScoreB.TeamB) {
+        // console.log("Egalité apres 5 tours, passage au Sudden Death !");
+        return playPenaltyShootoutRecursive(updatedScoreB, updatedHistory, seance + 1);
+    }
+
+    if (seance >= 5 && updatedScoreB.TeamA !== updatedScoreB.TeamB) {
+        // console.log("Victoire  apres 5 tirs !");
+        return Either.right(updatedHistory); // Victoire
+    }
+
+    if (seance > 5 && Math.abs(updatedScoreB.TeamA - updatedScoreB.TeamB) === 1) {
+        // console.log("Victoire en des qu'une equipe depasse !");
+        return Either.right(updatedHistory);
+    }
+
+    if (seance >= MAX_SEANCE_DE_TIRE_SENARIOT_D_EXCEPTION) {
+        // console.log("Match nul apres des prolongations interminables !");
+        return Either.left("Match nul apres des prolongations interminables !");
+    }
+
+    // Continuation de la séance
+    return playPenaltyShootoutRecursive(updatedScoreB, updatedHistory, seance + 1);
+};
+const displayHistory = (result: Either<string, PenaltyHistory>): void => {
+    if (result.isLeft()) {
+        console.log("Résultat : " + result.getLeft());
+        return;
+    }
+
+    const history = result.getRight();
+
+    if (!history || history.length === 0) {
+        console.log("Aucun historique disponible.");
+        return;
+    }
+
+    history.forEach(({ seance, score, result }) => {
+        console.log(
+            `Seance de tir ${seance}: Score: ${score.TeamA}/${score.TeamB} (Équipe ${
+                result.team
+            }: ${result.scored ? "✅" : "❌"})`
+        );
+    });
+
+    const finalScore = history[history.length - 1]?.score;
+    if (finalScore) {
+        console.log(
+            `Victoire : ${
+                finalScore.TeamA > finalScore.TeamB ? "TeamA" : "TeamB"
+            } (Score final: ${finalScore.TeamA}/${finalScore.TeamB})`
+        );
+    } else {
+        console.log("Impossible de determiner le score final.");
+    }
+};
+
+
+
+export function mainTD(): void {
+    const initialScore: Score = { TeamA: 0, TeamB: 0 };
+    const history = playPenaltyShootoutRecursive(initialScore);
+    displayHistory(history);
+
+    // // Client pour le Either
+    // const error = Either.left<string, number>("Division par zero");
+    // const success = Either.right<string, number>(42);
+    //
+    // console.log(error.isLeft()); // true
+    // console.log(success.isRight()); // true
+}

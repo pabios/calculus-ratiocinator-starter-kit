@@ -1,5 +1,7 @@
-import "./imperative-shell";
+import {mainTD} from "./imperative-shell";
 
 
-console.log("Bun demarre correctement ?");
+
+
+mainTD()
 
